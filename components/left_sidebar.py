@@ -39,7 +39,7 @@ class LeftSidebar(ctk.CTkFrame):
             row.pack(fill="x", pady=1, padx=2)
             row.pack_propagate(False)
             
-            lbl_name = ctk.CTkLabel(row, text=f"{coin}", font=FONT_UNIFIED, text_color=COLOR_TEXT_MAIN)
+            lbl_name = ctk.CTkLabel(row, text=f"{coin}USDT", font=FONT_UNIFIED, text_color=COLOR_TEXT_MAIN)
             lbl_name.pack(side="left", padx=SIDE_PAD+5)
             
             lbl_price = ctk.CTkLabel(row, text="---", font=FONT_UNIFIED, text_color=COLOR_TEXT_MAIN)
@@ -98,7 +98,7 @@ class LeftSidebar(ctk.CTkFrame):
                 lbl.configure(text=f"{float(p_map[s]):,.2f}")
 
     def update_comparison(self, data):
-        if not data or not self.comp_frame.winfo_viewable(): return # ไม่ต้องวาดถ้าซ่อนอยู่
+        if not data or not self.comp_frame.winfo_viewable(): return
         try:
             self.comp_ax.clear()
             self.comp_ax.set_facecolor(COLOR_BG_PANEL)
