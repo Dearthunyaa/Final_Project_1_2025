@@ -145,7 +145,7 @@ class ChartPanel(ctk.CTkFrame):
             self.ax1.text(
                 x=1.005, y=last_price, s=f"{last_price:,.2f}", color='white', fontsize=9, fontweight='bold',
                 va='center', ha='left', transform=self.ax1.get_yaxis_transform(),
-                bbox=dict(boxstyle="square,pad=0.2", facecolor=color_tag, edgecolor='none', alpha=1.0), clip_on=False 
+                bbox=dict(boxstyle="square,pad=0.2", facecolor=color_tag, edgecolor=COLOR_BG_MAIN, alpha=1.0), clip_on=False 
             )
 
             self.ax2.yaxis.tick_right()
