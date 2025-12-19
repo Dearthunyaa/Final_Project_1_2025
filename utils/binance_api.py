@@ -4,6 +4,7 @@ import threading
 import json
 import websocket
 
+
 class BinanceAPI:
     BASE_URL = "https://api.binance.com/api/v3"
 
@@ -13,8 +14,9 @@ class BinanceAPI:
             url = f"{BinanceAPI.BASE_URL}/klines?symbol={symbol}&interval={interval}&limit={limit}"
             resp = requests.get(url, timeout=3)
             data = resp.json()
-            
-            df = pd.DataFrame(data, columns=['ts', 'open', 'high', 'low', 'close', 'volume', 'ct', 'qav', 'nt', 'tbv', 'tqv', 'ig'])
+
+            df = pd.DataFrame(data, columns=[
+                              'ts', 'open', 'high', 'low', 'close', 'volume', 'ct', 'qav', 'nt', 'tbv', 'tqv', 'ig'])
             df['ts'] = pd.to_datetime(df['ts'], unit='ms')
             df.set_index('ts', inplace=True)
             df = df[['open', 'high', 'low', 'close', 'volume']].astype(float)
@@ -43,7 +45,8 @@ class BinanceAPI:
                     closes = [float(x[4]) for x in raw]
                     if closes:
                         start_price = closes[0]
-                        data[c] = [((p - start_price) / start_price) * 100 for p in closes]
+                        data[c] = [((p - start_price) / start_price)
+                                   * 100 for p in closes]
         except Exception as e:
             print(f"Comparison Data Error: {e}")
         return data
@@ -59,10 +62,10 @@ class BinanceStream:
     def start(self, symbol):
         self.stop()
         self.is_running = True
-        
+
         symbol = symbol.lower()
         stream_url = f"wss://stream.binance.com:9443/stream?streams={symbol}@ticker/{symbol}@depth20/{symbol}@aggTrade"
-        
+
         def run_ws():
             self.ws = websocket.WebSocketApp(
                 stream_url,
@@ -71,7 +74,7 @@ class BinanceStream:
                 on_close=self._on_close
             )
             self.ws.run_forever()
-        
+
         self.thread = threading.Thread(target=run_ws, daemon=True)
         self.thread.start()
 
@@ -82,7 +85,8 @@ class BinanceStream:
             self.ws = None
 
     def _on_message(self, ws, message):
-        if not self.is_running: return
+        if not self.is_running:
+            return
         try:
             data = json.loads(message)
             self.callback_func(data)
