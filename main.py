@@ -11,18 +11,19 @@ from components.right_sidebar import RightSidebar
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("dark-blue")
 
+
 class CryptoTerminal(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Cryptocurrency Dashboard")
         self.geometry("1600x750")
         self.configure(fg_color=COLOR_BG_MAIN)
-        
+
         self.symbol = DEFAULT_SYMBOL
         self.pair = DEFAULT_PAIR
         self.interval = DEFAULT_INTERVAL
         self.is_running = True
-        
+
         self.trades_buffer = deque(maxlen=25)
 
         self.grid_rowconfigure(0, weight=0)
@@ -30,10 +31,10 @@ class CryptoTerminal(ctk.CTk):
         self.grid_columnconfigure(0, weight=1)
 
         self.top_nav = TopNavPanel(self, self.change_pair)
-        
+
         self.main_area = ctk.CTkFrame(self, fg_color="transparent")
         self.main_area.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
-        
+
         self.main_area.grid_rowconfigure(0, weight=1)
         self.main_area.grid_columnconfigure(0, weight=0)
         self.main_area.grid_columnconfigure(1, weight=1)
@@ -50,14 +51,15 @@ class CryptoTerminal(ctk.CTk):
             "orderbook": self.right_panel.toggle_orderbook,
             "trades": self.right_panel.toggle_trades
         }
-        
-        self.chart_panel = ChartPanel(self.main_area, self.change_interval, callbacks_toggle=toggle_funcs)
+
+        self.chart_panel = ChartPanel(
+            self.main_area, self.change_interval, callbacks_toggle=toggle_funcs)
         self.chart_panel.grid(row=0, column=1, sticky="nsew")
 
         self.ws_manager = BinanceStream(self.handle_stream_data)
 
-        self.loop_chart()       
-        self.loop_comparison() 
+        self.loop_chart()
+        self.loop_comparison()
         self.ws_manager.start(self.pair)
 
         self.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -79,12 +81,12 @@ class CryptoTerminal(ctk.CTk):
             self.pair = f"{symbol}USDT"
         else:
             if " / " in new_pair_str:
-                 sym = new_pair_str.split(" / ")[0]
-                 self.symbol = sym
-                 self.pair = f"{sym}USDT"
+                sym = new_pair_str.split(" / ")[0]
+                self.symbol = sym
+                self.pair = f"{sym}USDT"
             else:
-                 self.pair = new_pair_str
-                 self.symbol = new_pair_str.replace("USDT", "")
+                self.pair = new_pair_str
+                self.symbol = new_pair_str.replace("USDT", "")
 
         self.top_nav.update_logo(self.symbol)
         if hasattr(self.top_nav, 'ticker_btn'):
@@ -99,7 +101,8 @@ class CryptoTerminal(ctk.CTk):
         self._fetch_chart()
 
     def loop_chart(self):
-        if not self.is_running: return
+        if not self.is_running:
+            return
         threading.Thread(target=self._fetch_chart, daemon=True).start()
         self.after(60000, self.loop_chart)
 
@@ -109,7 +112,8 @@ class CryptoTerminal(ctk.CTk):
             self.after(0, lambda: self.chart_panel.update_chart(df))
 
     def loop_comparison(self):
-        if not self.is_running: return
+        if not self.is_running:
+            return
         threading.Thread(target=self._fetch_comp, daemon=True).start()
         self.after(5000, self.loop_comparison)
 
@@ -123,10 +127,11 @@ class CryptoTerminal(ctk.CTk):
         if hasattr(self.left_panel, 'update_comparison'):
             self.left_panel.update_comparison(comp_data)
         elif hasattr(self.left_panel, 'update_graph'):
-             self.left_panel.update_graph(comp_data)
+            self.left_panel.update_graph(comp_data)
 
     def handle_stream_data(self, payload):
-        if not payload or 'data' not in payload: return
+        if not payload or 'data' not in payload:
+            return
         stream_name = payload['stream']
         data = payload['data']
         self.after(0, lambda: self._update_ui_from_ws(stream_name, data))
@@ -134,12 +139,12 @@ class CryptoTerminal(ctk.CTk):
     def _update_ui_from_ws(self, stream, data):
         if 'ticker' in stream:
             ticker_info = {
-                'lastPrice': data['c'],          
-                'priceChangePercent': data['P'], 
+                'lastPrice': data['c'],
+                'priceChangePercent': data['P'],
                 'highPrice': data['h'],
                 'lowPrice': data['l'],
-                'volume': data['v'],       
-                'quoteVolume': data['q']   
+                'volume': data['v'],
+                'quoteVolume': data['q']
             }
             self.top_nav.update_data(ticker_info)
         elif 'depth' in stream:
@@ -148,7 +153,7 @@ class CryptoTerminal(ctk.CTk):
             self.trades_buffer.appendleft(data)
             self.right_panel.update_trades(list(self.trades_buffer))
 
+
 if __name__ == "__main__":
     app = CryptoTerminal()
     app.mainloop()
-    
